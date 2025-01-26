@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Auction - Auction Details</title>
+    <link rel="stylesheet" href="../public/css/main.css" />
+  </head>
+  <body>
+    <nav class="navbar" style="display: inline-flex; width: 100%">
+      <div class="container-fluid">
+        <img
+          src="../public/images/RetroBidsLogo.png"
+          alt=""
+          style="height: 100px"
+        />
+      </div>
+      <div class="container">
+        <div class="navbar-brand">Game Auction</div>
+        <ul class="navbar-nav">
+          <!-- <li><a href="./index.html">Home</a></li> -->
+
+          <li><a href="./auctions.html">Auctions</a></li>
+
+          <li><a href="./create-auction.html">Create Auction</a></li>
+          <li><a href="#" id="logout-link">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="auction-details" id="auction-details">
+        <!-- Details will be dynamically populated -->
+      </div>
+
+      <div class="bid-section">
+        <h3>Place a Bid</h3>
+        <form id="place-bid-form">
+          <input
+            type="number"
+            id="bid-amount"
+            placeholder="Enter your bid"
+            required
+          />
+          <button type="submit" class="btn btn-primary">Place Bid</button>
+        </form>
+      </div>
+
+      <div class="bids-history">
+        <h3>Bid History</h3>
+        <table id="bids-table">
+          <thead>
+            <tr>
+              <th>Bidder</th>
+              <th>Amount</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="bids-list">
+            <!-- Bids will be dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Get auction ID from URL
+      const auctionId = new URLSearchParams(window.location.search).get("id");
+
+      // Fetch auction details
+      // Fetch auction details
+      async function fetchAuctionDetails() {
+        try {
+          const token = sessionStorage.getItem("token");
+          if (!token) {
+            throw new Error("No authentication token found");
+          }
+
+          const response = await fetch(`/api/bids/${auctionId}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message || "Failed to fetch auction details"
+            );
+          }
+
+          const data = await response.json();
+          console.log("Auction Data:", data);
+
+          // Check if data exists and has bids
+          if (data.bids && data.bids.length > 0) {
+            renderAuctionDetails(data.bids[0]);
+            fetchBidHistory(auctionId);
+          } else {
+            throw new Error("No auction details found");
+          }
+        } catch (error) {
+          console.error("Error fetching auction details:", error);
+          document.getElementById("auction-details").innerHTML = `
+                  <p>Error: ${error.message}</p>
+                `;
+        }
+      }
+
+      // Render auction details
+      function renderAuctionDetails(auction) {
+        const detailsContainer = document.getElementById("auction-details");
+
+        // Use optional chaining and provide fallbacks
+        detailsContainer.innerHTML = `
+                <div class="auction-header">
+                  <img  style="height: 200px; object-fit: cover;" src="${
+                    auction.poster || "/default-game-poster.jpg"
+                  }" alt="${auction.game_id || "Game Image"}">
+                  <div class="auction-info">
+                    <h2>${auction.game_id || "Unknown Game"}</h2>
+                    <p>Platform: ${auction.platform_id || "N/A"}</p>
+                    <p>Starting Price: $${parseFloat(
+                      auction.start_price || 0
+                    ).toFixed(2)}</p>
+                    <p>Current Price: $${parseFloat(
+                      auction.current_price || auction.start_price || 0
+                    ).toFixed(2)}</p>
+                    <p>Auction Ends: ${
+                      auction.end_date
+                        ? new Date(auction.end_date).toLocaleDateString()
+                        : "Not specified"
+                    }</p>
+                    <p>Status: ${auction.status || "Unknown"}</p>
+                  </div>
+                </div>
+              `;
+      }
+
+      // Fetch bid history
+      //   async function fetchBidHistory(auctionId) {
+      //     try {
+      //       const response = await fetch(`/api/auctions/${auctionId}/bids`, {
+      //         headers: {
+      //           Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      //         },
+      //       });
+
+      //       const bids = await response.json();
+
+      //       console.log("bids", bids);
+      //       renderBidHistory(bids);
+      //     } catch (error) {
+      //       console.error("Error fetching bid history:", error);
+      //     }
+      //   }
+
+      //   // Render bid history
+      //   function renderBidHistory(bids) {
+      //     const bidsList = document.getElementById("bids-list");
+      //     bidsList.innerHTML = "";
+
+      //     bids.bids.forEach((bid) => {
+      //       const row = document.createElement("tr");
+      //       row.innerHTML = `
+      //                 <td>${bid.user_id}</td>
+      //                 <td>$${bid.bid_amount}</td>
+      //                 <td>${new Date(bid.bid_time).toLocaleString()}</td>
+      //             `;
+      //       bidsList.appendChild(row);
+      //     });
+      //   }
+
+      // Fetch bid history
+      async function fetchBidHistory(auctionId) {
+        try {
+          const response = await fetch(`/api/auctions/${auctionId}/bids`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          });
+
+          const bidsData = await response.json();
+
+          // Fetch user details for each bid
+          const enrichedBids = await Promise.all(
+            bidsData.bids.map(async (bid) => {
+              try {
+                const userResponse = await fetch(
+                  `/api/auctions/users/${bid.user_id}`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${sessionStorage.getItem(
+                        "token"
+                      )}`,
+                    },
+                  }
+                );
+                const userData = await userResponse.json();
+                return {
+                  ...bid,
+                  user_name: userData.name, // Assuming the API returns a user object with a name property
+                };
+              } catch (error) {
+                console.error(`Error fetching user ${bid.user_id}:, error`);
+                return {
+                  ...bid,
+                  user_name: `User ${bid.user_id}`, // Fallback display
+                };
+              }
+            })
+          );
+
+          console.log("enrichedBids", enrichedBids);
+          renderBidHistory(enrichedBids);
+        } catch (error) {
+          console.error("Error fetching bid history:", error);
+        }
+      }
+
+      // Render bid history
+      function renderBidHistory(bids) {
+        const bidsList = document.getElementById("bids-list");
+        bidsList.innerHTML = "";
+
+        bids.forEach((bid) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${bid.user_name}</td>
+            <td>$${bid.bid_amount}</td>
+            <td>${new Date(bid.bid_time).toLocaleString()}</td>
+          `;
+          bidsList.appendChild(row);
+        });
+      }
+
+      // Place a bid
+      async function placeBid(e) {
+        e.preventDefault();
+        const bidAmount = document.getElementById("bid-amount").value;
+
+        try {
+          const response = await fetch(`/api/auctions/${auctionId}/bid`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ bid_amount: parseFloat(bidAmount) }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert("Bid placed successfully!");
+            fetchAuctionDetails(); // Refresh auction details
+            fetchBidHistory(auctionId); // Refresh bid history
+          } else {
+            alert(result.message || "Failed to place bid");
+          }
+        } catch (error) {
+          console.error("Error placing bid:", error);
+        }
+      }
+
+      // Event Listeners
+      document
+        .getElementById("place-bid-form")
+        .addEventListener("submit", placeBid);
+      document.getElementById("logout-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        window.location.href = "/index.html";
+      });
+
+      // Initial setup
+      fetchAuctionDetails();
+    </script>
+  </body>
+</html>

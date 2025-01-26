@@ -1,0 +1,237 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Auction Platform</title>
+    <link rel="stylesheet" href="../public/css/main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">Game Auction</div>
+            <ul class="navbar-nav">
+               
+                <li><a href="./auctions.html">Auctions</a></li>
+                 <li><a href="./create-auction.html">Create Auction</a></li>
+                <li><a href="#" id="logout-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 style="text-align: center; margin-top: 50px; color: var(--primary-color);">
+            Welcome to the Game Auction Platform
+        </h1>
+        <p style="text-align: center; margin-top: 20px;">
+            Explore and bid on your favorite games.
+        </p>
+
+    </div>
+
+     <script>
+        document.getElementById('logout-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Auction - Home</title>
+    <link rel="stylesheet" href="../public//css/main.css" />
+    <style>
+      /* Custom styles for index page */
+      .hero {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+          url("/images/hero-background.jpg");
+        background-size: cover;
+        background-position: center;
+        color: white;
+        text-align: center;
+        padding: 100px 20px;
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+      }
+
+      .features {
+        display: flex;
+        justify-content: space-around;
+        padding: 50px 20px;
+        background-color: #f4f4f4;
+      }
+
+      .feature {
+        text-align: center;
+        max-width: 300px;
+        padding: 20px;
+      }
+
+      .feature img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 15px;
+      }
+
+      .recent-auctions {
+        padding: 50px 20px;
+        background-color: white;
+      }
+
+      .auction-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      .cta {
+        text-align: center;
+        padding: 50px 20px;
+        background-color: #bd3333;
+        color: white;
+      }
+
+      .cta h2 {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar" style="display: inline-flex; width: 100%">
+      <div class="container-fluid">
+        <img
+          src="../public/images/RetroBidsLogo.png"
+          alt=""
+          style="height: 100px"
+        />
+      </div>
+      <div class="container">
+        <div class="navbar-brand">RetroBids</div>
+        <ul class="navbar-nav">
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./about.html">About</a></li>
+
+          <!-- <li><a href="./auctions.html">Auctions</a></li> -->
+          <li><a href="./login.html">Login</a></li>
+          <li><a href="./register.html">Register</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-content">
+        <h1>Rediscover Classic Gaming</h1>
+        <p>
+          Trade, Buy, and Sell Vintage Video Games from PS1, PS2, and Wii - Your
+          Nostalgic Gaming Marketplace
+        </p>
+        <a href="./register.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </header>
+
+    <section class="features">
+      <div class="feature">
+        <img src="../public/images/auction-icon.png" alt="Auction Icon" />
+        <h3>Auction System</h3>
+        <p>Bid on rare and classic video game titles from various platforms.</p>
+      </div>
+      <div class="feature">
+        <img src="../public/images/secure-icon.png" alt="Secure Icon" />
+        <h3>Secure Transactions</h3>
+        <p>Safe and verified platform for game enthusiasts to trade.</p>
+      </div>
+      <div class="feature">
+        <img src="../public/images/community-icon.png" alt="Community Icon" />
+        <h3>Gaming Community</h3>
+        <p>Connect with fellow gamers and collectors from around the world.</p>
+      </div>
+    </section>
+
+    <section class="recent-auctions">
+      <div class="container">
+        <h2 style="text-align: center; margin-bottom: 30px">Recent Auctions</h2>
+        <div class="auction-grid" id="recent-auctions">
+          <!-- Dynamically populated recent auctions -->
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Join RetroBids Today</h2>
+      <p>Start your vintage gaming collection journey now!</p>
+      <a href="./register.html" class="btn btn-primary">Create Account</a>
+    </section>
+
+    <footer
+      style="
+        background-color: #8e1a1a;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      "
+    >
+      <p>&copy;RetroBids All rights reserved.</p>
+    </footer>
+
+    <script>
+      // Fetch recent auctions
+      async function fetchRecentAuctions() {
+        try {
+          const response = await fetch(
+            "/api/auctions?sortBy=start_date&sortOrder=desc&limit=3"
+          );
+          const data = await response.json();
+          renderRecentAuctions(data.auctions);
+        } catch (error) {
+          console.error("Error fetching recent auctions:", error);
+        }
+      }
+
+      function renderRecentAuctions(auctions) {
+        const auctionsContainer = document.getElementById("recent-auctions");
+        auctionsContainer.innerHTML = "";
+
+        auctions.forEach((auction) => {
+          const auctionCard = document.createElement("div");
+          auctionCard.classList.add("auction-card", "card");
+          auctionCard.innerHTML = `
+                    <img src="${
+                      auction.poster_url || "/default-game-poster.jpg"
+                    }" alt="${auction.game_name}">
+                    <div class="auction-card-content">
+                        <h3>${auction.game_name}</h3>
+                        <p>Platform: ${auction.platform}</p>
+                        <p>Starting Price: $${auction.start_price}</p>
+                        <a href="/auction-detail.html?id=${
+                          auction.id
+                        }" class="btn btn-primary">View Auction</a>
+                    </div>
+                `;
+          auctionsContainer.appendChild(auctionCard);
+        });
+      }
+
+      // Initial fetch of recent auctions
+      fetchRecentAuctions();
+    </script>
+  </body>
+</html>

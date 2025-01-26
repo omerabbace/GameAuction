@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Auction - Active Auctions</title>
+    <link rel="stylesheet" href="../public/css/main.css" />
+  </head>
+  <body>
+    <nav class="navbar" style="display: inline-flex; width: 100%">
+      <div class="container-fluid">
+        <img
+          src="../public/images/RetroBidsLogo.png"
+          alt=""
+          style="height: 100px"
+        />
+      </div>
+      <div class="container">
+        <div class="navbar-brand">Game Auction</div>
+        <ul class="navbar-nav">
+          <!-- <li><a href="./index.html">Home</a></li> -->
+
+          <li><a href="./auctions.html">Auctions</a></li>
+          <li><a href="./create-auction.html">Create Auction</a></li>
+          <li><a href="#" id="logout-link">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h1>Active Game Auctions</h1>
+
+      <div class="auction-filters">
+        <select id="platform-filter">
+          <option value="">All Platforms</option>
+          <option value="PS1">PlayStation 1</option>
+          <option value="PS2">PlayStation 2</option>
+          <option value="Wii">Nintendo Wii</option>
+        </select>
+
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search game name..."
+        />
+
+        <select id="sort-filter">
+          <option value="start_date-desc">Newest First</option>
+          <option value="start_price-asc">Lowest Price</option>
+          <option value="start_price-desc">Highest Price</option>
+        </select>
+      </div>
+
+      <div id="auctions-grid" class="auction-grid">
+        <!-- Auctions will be dynamically populated here -->
+      </div>
+    </div>
+
+    <script>
+      // Function to fetch and display auctions
+      async function fetchAuctions() {
+        try {
+          const platform = document.getElementById("platform-filter").value;
+          const searchTerm = document.getElementById("search-input").value;
+          const [sortBy, sortOrder] = document
+            .getElementById("sort-filter")
+            .value.split("-");
+
+          const queryParams = new URLSearchParams({
+            platform,
+            game_name: searchTerm,
+            sortBy,
+            sortOrder,
+          });
+
+          const response = await fetch(`/api/auctions?${queryParams}`, {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+            },
+          });
+
+          const data = await response.json();
+          console.log(data);
+          renderAuctions(data.auctions);
+        } catch (error) {
+          console.error("Error fetching auctions:", error);
+        }
+      }
+
+      // Function to render auctions
+
+      function renderAuctions(auctions) {
+        const grid = document.getElementById("auctions-grid");
+        grid.innerHTML = ""; // Clear previous auctions
+
+        auctions.forEach((auction) => {
+          const auctionCard = document.createElement("div");
+          auctionCard.classList.add("auction-card", "card");
+          auctionCard.innerHTML = `
+                    <img src="${`http://localhost:3000//${auction.poster}`}" alt="${
+            auction.game_name
+          }">
+                    <div class="auction-card-content">
+                        <h3>${auction.game_id}</h3>
+                        <p>Platform: ${auction.platform_id}</p>
+                        <p>Starting Price: $${auction.start_price}</p>
+                        <p>Ends: ${new Date(
+                          auction.end_date
+                        ).toLocaleDateString()}</p>
+                        <a href="/auction-detail.html?id=${
+                          auction.id
+                        }" class="btn btn-primary">View Details</a>
+                    </div>
+                `;
+
+          grid.appendChild(auctionCard);
+        });
+      }
+
+      // Event Listeners
+      document
+        .getElementById("platform-filter")
+        .addEventListener("change", fetchAuctions);
+      document
+        .getElementById("search-input")
+        .addEventListener("input", fetchAuctions);
+      document
+        .getElementById("sort-filter")
+        .addEventListener("change", fetchAuctions);
+      // Logout functionality
+      document.getElementById("logout-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        window.location.href = "/index.html";
+      });
+
+      // Initial fetch
+      fetchAuctions();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Game Auction Platform</title>
+    <link rel="stylesheet" href="../../public/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <h1>Admin Dashboard</h1>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </header>
+
+        <div class="admin-content">
+            <div class="sidebar">
+                <button class="nav-btn active" data-section="platforms">Platforms</button>
+                <button class="nav-btn" data-section="games">Games</button>
+            </div>
+
+            <div class="main-content">
+                <!-- Platforms Section -->
+                <section id="platforms-section" class="active">
+                    <h2>Game Platforms Management</h2>
+                    <div class="action-bar">
+                        <button id="add-platform-btn" class="add-btn">Add New Platform</button>
+                    </div>
+                    <table id="platforms-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="platforms-list">
+                            <!-- Platforms will be dynamically populated here -->
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Games Section -->
+                <section id="games-section">
+                    <h2>Games Management</h2>
+                    <div class="action-bar">
+                        <button id="add-game-btn" class="add-btn">Add New Game</button>
+                    </div>
+                    <table id="games-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Platform</th>
+                                <th>Age Rating</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="games-list">
+                            <!-- Games will be dynamically populated here -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Platform Add/Edit Modal -->
+    <div id="platform-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="platform-modal-title">Add Platform</h2>
+            <form id="platform-form">
+                <input type="hidden" id="platform-id">
+                <input type="text" id="platform-name" placeholder="Platform Name" required>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Game Add/Edit Modal -->
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="game-modal-title">Add Game</h2>
+            <form id="game-form">
+                <input type="hidden" id="game-id">
+                <input type="text" id="game-name" placeholder="Game Name" required>
+                <select id="game-platform" required>
+                    <!-- Platforms will be dynamically populated here -->
+                </select>
+                <input type="text" id="game-age-rating" placeholder="Age Rating" required>
+                <textarea id="game-synopsis" placeholder="Game Synopsis" required></textarea>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../public/js/admin.js"></script>
+</body>
+</html>
